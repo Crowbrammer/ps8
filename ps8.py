@@ -192,9 +192,9 @@ class Patient(SimplePatient):
         if newDrug not in self.getPrescriptions():
             self.activeDrugs.append(newDrug)
             print("Prescription, {} added...".format(newDrug))
-            print("patient.getPrescriptions()", patient.getPrescriptions())
+            print("patient.getPrescriptions()", self.getPrescriptions())
         else:
-            print(newDrug, "already administered."
+            print(newDrug, "already administered.")
 
     def getPrescriptions(self):
 
@@ -268,36 +268,39 @@ def startingViri():
         herpes.append(ResistantVirus(0.1, 0.05, {"guttagonol":False, "grimpex":False}, 0.005))
     return herpes
 
-def updateData(patient, amt, data1=None, data2=None, data3=None):
+def updateData(patient, amt, data1=None, data2=None, data3=None, data4=None):
     for time in range(amt):
         patient.update(patient.getPrescriptions())
 
         # If continuous, uncomment
         data1.append(patient.getTotalPop())
-        data2.append(patient.getResistPop(patient.getPrescriptions()[0]))
-        data3.append(patient.getResistPop(patient.getPrescriptions()[1]))
+        data2.append(patient.getResistPop(["guttagonol"]))
+        data3.append(patient.getResistPop(["grimpex"]))
+        data4.append(patient.getResistPop(["guttagonol", "grimpex"]))
 
 
-def updateContinuousData(patients, data1, data2, data3, delay=150)
+def updateContinuousData(patient, data1, data2, data3, data4, delay=150, trial_num=1):
 
     # Trial One
-    updateData(patient[0], 150)
-    patient.addPrescription("guttagonol")
+    if trial_num == 1:
+        updateData(patient, 150, data1, data2, data3, data4)
+        patient.addPrescription("guttagonol")
 
-    updateData(patient[0], 300)
-    patient.addPrescription("grimpex")
+        updateData(patient, 300, data1, data2, data3, data4)
+        patient.addPrescription("grimpex")
 
-    updateData(patient, 150)
+        updateData(patient, 150, data1, data2, data3, data4)
 
     # Trial Two
-    updateData(patient[0], 150)
-    patient.addPrescription("guttagonol")
-    patient.addPrescription("grimpex")
+    if trial_num == 2:
+        updateData(patient, 150, data1, data2, data3, data4)
+        patient.addPrescription("guttagonol")
+        patient.addPrescription("grimpex")
 
-    updateData(patient[0], 300)
+        updateData(patient, 300, data1, data2, data3, data4)
 
 
-def simulationWithDrug(num_trials, delay, fignum):
+def simulationWithDrug(num_trials=None, delay=None, fignum=None):
 
     """
 
@@ -309,15 +312,17 @@ def simulationWithDrug(num_trials, delay, fignum):
     """
     # TODO
 
-    herpes_list = [startingViri() for x in range(num_trials)]
+    # herpes_list = [startingViri() for x in range(num_trials)]
     evolving_herpes_pop = []
     evolving_gut_res_herpes_pop = []
     evolving_gri_res_herpes_pop = []
+    evolving_mult_res_herpes_pop = []
 
     evolving_average_herpes_pop = []
     evolving_average_gut_res_herpes_pop = []
-    # Sydney = Patient(herpes, 1000)
-    patients = [Patient(herpes_list[x], 1000) for x in range(num_trials)]
+    Sydney = Patient(startingViri(), 1000)
+    Peter_Sr = Patient(startingViri(), 1000)
+    # patients = [Patient(herpes_list[x], 1000) for x in range(num_trials)]
 
     # print(Sydney.getTotalPop())
     # print("Sydney.getPrescriptions()", Sydney.getPrescriptions())
@@ -332,14 +337,34 @@ def simulationWithDrug(num_trials, delay, fignum):
     # # updateData(Sydney, evolving_herpes_pop, evolving_gut_res_herpes_pop, 150)
 
     # updateAverageData(patients, evolving_average_herpes_pop, evolving_average_gut_res_herpes_pop, delay)
-    updateContinuousData(patients, data1=evolving_herpes_pop, data2=evolving_gut_res_herpes_pop, data3=evolving_gri_res_herpes_pop, delay=150)
+    updateContinuousData(Sydney, data1=evolving_herpes_pop, data2=evolving_gut_res_herpes_pop,
+                    data3=evolving_gri_res_herpes_pop, data4=evolving_mult_res_herpes_pop, delay=150, trial_num=1)
 
     # print("Sydney.getTotalPop()", Sydney.getTotalPop())
     pylab.figure()
-    pylab.title('Effect of {} Delay of Treatment on Herpes Population'.format(delay))
-    pylab.xlabel('Total Population')
-    pylab.ylabel('# of Patients')
-    pylab.axis([0, 1000, 0, 50])
+    pylab.title('Analysis of Virus Population Dynamics with Two Drugs (Separate Times)'.format(delay))
+    pylab.xlabel('Cycle #')
+    pylab.ylabel('Population')
+
+    pylab.plot(range(len(evolving_herpes_pop)), evolving_herpes_pop, label="Total")
+    pylab.plot(range(len(evolving_gut_res_herpes_pop)), evolving_gut_res_herpes_pop, label="Gut-Res")
+    pylab.plot(range(len(evolving_gri_res_herpes_pop)), evolving_gri_res_herpes_pop, label="Gri-Res")
+    pylab.plot(range(len(evolving_mult_res_herpes_pop)), evolving_mult_res_herpes_pop, label="Mult-Res")
+    pylab.legend(loc='upper right')
+
+    evolving_herpes_pop = []
+    evolving_gut_res_herpes_pop = []
+    evolving_gri_res_herpes_pop = []
+    evolving_mult_res_herpes_pop = []
+
+    updateContinuousData(Peter_Sr, data1=evolving_herpes_pop, data2=evolving_gut_res_herpes_pop,
+                        data3=evolving_gri_res_herpes_pop, data4=evolving_mult_res_herpes_pop, delay=150, trial_num=2)
+
+    pylab.figure()
+    pylab.title('Analysis of Virus Population Dynamics with Two Drugs (Same Time)'.format(delay))
+    pylab.xlabel('Cycle #')
+    pylab.ylabel('Population')
+    # pylab.axis([0, 1000, 0, 50])
 
     # a,b = pylab.polyfit(range(len(evolving_average_herpes_pop)), evolving_average_herpes_pop, 1)
     # c,d = pylab.polyfit(range(len(evolving_average_herpes_pop)), evolving_average_gut_res_herpes_pop, 1)
@@ -353,21 +378,26 @@ def simulationWithDrug(num_trials, delay, fignum):
     # pylab.hist(data, bins=binBoundaries) #, bins=range(min(data), max(data) + binwidth, binwidth))
     # pylab.plot(range(len(evolving_average_herpes_pop)), evolving_average_herpes_pop)
     # pylab.plot(range(len(evolving_average_herpes_pop)), evolving_average_gut_res_herpes_pop)
-    pylab.plot(range(len(evolving_herpes_pop)), evolving_herpes_pop)
-    pylab.plot(range(len(evolving_average_herpes_pop)), evolving_average_gut_res_herpes_pop)
+
+    pylab.plot(range(len(evolving_herpes_pop)), evolving_herpes_pop, label="Total")
+    pylab.plot(range(len(evolving_gut_res_herpes_pop)), evolving_gut_res_herpes_pop, label="Gut-Res")
+    pylab.plot(range(len(evolving_gri_res_herpes_pop)), evolving_gri_res_herpes_pop,label="Gri-Res")
+    pylab.plot(range(len(evolving_mult_res_herpes_pop)), evolving_mult_res_herpes_pop, label="Mult-Res")
+    pylab.legend(loc='upper right')
 
 
 # Try except every variable, if it works, good. IF not, give me a chance to put the right variable in.
 
 
 
-
-for trial_size in [300, 150, 75, 0]:
-    fignum = [300, 150, 75, 0].index(trial_size) + 1
-    simulationWithDrug(100, trial_size, fignum)
-    print("fignum:", fignum)
+# Average Trial
+# for trial_size in [300, 150, 75, 0]:
+#     fignum = [300, 150, 75, 0].index(trial_size) + 1
+#     simulationWithDrug(100, trial_size, fignum)
+#     print("fignum:", fignum)
 #for trial in range(10):
     #simulationWithoutDrug()
+simulationWithDrug()
 pylab.show()
 
 #
