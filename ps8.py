@@ -341,7 +341,7 @@ def updateContinuousData(patient, data1, data2, data3, data4, delay=150, trial_n
             updateData(patient, 50, data1, data2, data3, data4)
             # [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
             countResistances(patient)
-            input("Check data...")
+            # input("Check data...")
         patient.addPrescription("guttagonol")
 
         for cycle in range(6):
@@ -349,28 +349,28 @@ def updateContinuousData(patient, data1, data2, data3, data4, delay=150, trial_n
             # print("Resistances for each virus...")
             # [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
             countResistances(patient)
-            input("Check data...")
+            # input("Check data...")
         patient.addPrescription("grimpex")
 
         for cycle in range(3):
             updateData(patient, 50, data1, data2, data3, data4)
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            # [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
             countResistances(patient)
-            input("Check data...")
+            # input("Check data...")
 
     # Trial Two
     if trial_num == 2:
         for cycle in range(3):
             updateData(patient, 50, data1, data2, data3, data4)
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            input("Check data...")
+            # [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            # input("Check data...")
         patient.addPrescription("guttagonol")
         patient.addPrescription("grimpex")
 
         for cycle in range(3):
             updateData(patient, 50, data1, data2, data3, data4)
             [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            input("Check data...")
+            # input("Check data...")
 
 
 def simulationWithDrug(num_trials=None, delay=None, fignum=None):
