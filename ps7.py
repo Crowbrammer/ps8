@@ -70,12 +70,14 @@ class SimpleVirus(object):
 
         # TODO
 
-
+        # print("self.getClearProb(): {}".format(str(self.getClearProb())))
         if random.random() < self.getClearProb():
             # print("doesClear value: True")
+            # print("doesClear() returns: True")
             return True
         else:
             # print("doesClear value: False")
+            # print("doesClear() returns: False")
             return False
 
 
@@ -186,13 +188,17 @@ class SimplePatient(object):
         for virus in viruses:
             # print("virus:", viruses)
             # assert virus != None, "at PS7's update() method"
-            if virus.doesClear():
+            clear_Value = virus.doesClear()
+            if clear_Value == True:
+                if clear_Value == False:
+                    print("virus.doesClear() =", virus.doesClear(), "and virus removed.")
                 viruses.remove(virus)
             else:
                 popDensity = self.getTotalPop() / self.getMaxPop()
                 try:
                     John = virus.reproduce(popDensity, activeDrugs)
                     # assert John != None, "Gotcha, ya bitch!"
+                    # if John == None: input("John = {}".format(str(John)))
                     if John != None: viruses.append(John)
                 except NoChildException:
                     continue

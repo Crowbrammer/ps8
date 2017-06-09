@@ -61,7 +61,7 @@ class ResistantVirus(SimpleVirus):
 
         return self.resistances
 
-    def setRestistance(self, drug, value):
+    def setResistance(self, drug, value):
         """
         Sets the resistance of a drug to a given value
         """
@@ -133,21 +133,35 @@ class ResistantVirus(SimpleVirus):
         # TODO
 
         # if True not in self.resistances.values()
-        if True not in [self.isResistantTo(drug) for drug in self.getResistances()]:
+        # print("[self.isResistantTo(drug) for drug in activeDrugs]:", [self.isResistantTo(drug) for drug in activeDrugs])
+
+        # if not activeDrugs:
+        #     if random.random() < self.getMaxBirthProb() * (1 - popDensity):
+        #         offspring_virus = copy.copy(self)
+        #         return offspring_virus
+
+        print([self.isResistantTo(drug) for drug in activeDrugs])
+        print(activeDrugs)
+        print(all([self.isResistantTo(drug) for drug in activeDrugs]))
+
+        if all([self.isResistantTo(drug) for drug in activeDrugs]):
             if random.random() < self.getMaxBirthProb() * (1 - popDensity):
                 offspring_virus = copy.copy(self)
                 # print("offspring_virus:", offspring_virus)
-                for drug in activeDrugs: # offspring_virus.resistances.keys():
-                    if random.random() < 1 - offspring_virus.getMutProb():
-                        continue
-                    else:
-                        # print(self.getResistances())
+                allDrugs = offspring_virus.getResistances().keys()
+                for drug in allDrugs: # offspring_virus.resistances.keys():
+                    # print("activeDrugs:", activeDrugs)
+                    # print("drug:", drug)
+                    if random.random() < offspring_virus.getMutProb():
                         try:
                             offspring_res = not self.getResistances()[drug]
-                            offspring_virus.setRestistance(drug, offspring_res)
+                            offspring_virus.setResistance(drug, offspring_res)
                         except KeyError:
                             print("Here's why there's a KeyError")
                             print("Keys:", self.getResistances().keys())
+                            print(input())
+                        # print(self.getResistances())
+
                 # print("offspring_virus:", offspring_virus)
                 # assert offspring_virus != None, "At method reproduce()"
                 return offspring_virus
@@ -218,22 +232,48 @@ class Patient(SimplePatient):
         Get the population of virus particles resistant to the drugs listed in
         drugResist.
 
-        drugResist: Which drug resistances to include in the population (a list
+        drugResist: Which drug resistances to include in the population (a set
         of strings - e.g. ['guttagonol'] or ['guttagonol', 'grimpex'])
 
         returns: the population of viruses (an integer) with resistances to all
         drugs in the drugResist list.
         """
         # TODO
+
+        # viruses = self.getViruses()
+
+        # input("Current drugs analyzed for resistance are:", drugResist)
+
         res_viruses = 0
-
         for virus in self.getViruses():
-            for drug in drugResist:
-                # print("virus.getResistances():", virus.getResistances())
-                if virus.getResistances()[drug]:
-                    res_viruses += 1
+            resistances = virus.getResistances()
+            current_drugs = {key:val for key, val in resistances.items() if key in drugResist}
+            if all(current_drugs.values()) and current_drugs.values():
+                res_viruses += 1
+            # print("current_drugs = {key:value for key, val in viruses.items() if key in drugResist}")
+            # print("current_drugs:")
+            # print(current_drugs)
+            # is_res = False
+            # print("drugResist")
+            # print(drugResist)
+            # #for drug in drugResist
+            # print("self.getResistances().values()")
+            # print(virus.getResistances().values())
+            # input()
+            #
+            # # Only if it's true for all drugs it needs to rest
+            # # Add one to the resistant population
+            #
+            # if is_res:
+            #     res_viruses += 1
+            #     print("virus.getResistances():", virus.getResistances())
+            # else:
+            #     res_viruses += 1
+            #     print("virus.getResistances():", virus.getResistances())
 
+        # input("Viri analyzed for resistance... ")
         return res_viruses
+
 
 
     def update(self, activeDrugs):
@@ -278,26 +318,57 @@ def updateData(patient, amt, data1=None, data2=None, data3=None, data4=None):
         data3.append(patient.getResistPop(["grimpex"]))
         data4.append(patient.getResistPop(["guttagonol", "grimpex"]))
 
+def countResistances(patient):
+    resistances = [virus.getResistances() for virus in [virus for virus in patient.getViruses()]]
+    guttagonol_resistances = [res["guttagonol"] for res in resistances]
+    gut_res_count = guttagonol_resistances.count(True)
+    print("patient.getPrescriptions():", patient.getPrescriptions())
+    print("# of resistance viri vs. the total:", gut_res_count, "/", len(resistances))
+    try:
+        print("Percentage of resistant viri:", round(gut_res_count / len(resistances) * 100, 2))
+    except ZeroDivisionError:
+        print("No viri populutation.")
+    # return total
+
 
 def updateContinuousData(patient, data1, data2, data3, data4, delay=150, trial_num=1):
 
     # Trial One
     if trial_num == 1:
-        updateData(patient, 150, data1, data2, data3, data4)
+        for cycle in range(3):
+            updateData(patient, 50, data1, data2, data3, data4)
+            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            countResistances(patient)
+            input("Check data...")
         patient.addPrescription("guttagonol")
 
-        updateData(patient, 300, data1, data2, data3, data4)
+        for cycle in range(6):
+            updateData(patient, 50, data1, data2, data3, data4)
+            print("Resistances for each virus...")
+            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            countResistances(patient)
+            input("Check data...")
         patient.addPrescription("grimpex")
 
-        updateData(patient, 150, data1, data2, data3, data4)
+        for cycle in range(3):
+            updateData(patient, 50, data1, data2, data3, data4)
+            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            countResistances(patient)
+            input("Check data...")
 
     # Trial Two
     if trial_num == 2:
-        updateData(patient, 150, data1, data2, data3, data4)
+        for cycle in range(3):
+            updateData(patient, 50, data1, data2, data3, data4)
+            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            input("Check data...")
         patient.addPrescription("guttagonol")
         patient.addPrescription("grimpex")
 
-        updateData(patient, 300, data1, data2, data3, data4)
+        for cycle in range(3):
+            updateData(patient, 50, data1, data2, data3, data4)
+            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+            input("Check data...")
 
 
 def simulationWithDrug(num_trials=None, delay=None, fignum=None):
@@ -320,8 +391,8 @@ def simulationWithDrug(num_trials=None, delay=None, fignum=None):
 
     evolving_average_herpes_pop = []
     evolving_average_gut_res_herpes_pop = []
-    Sydney = Patient(startingViri(), 1000)
-    Peter_Sr = Patient(startingViri(), 1000)
+    Sydney = Patient(startingViri(), 10000)
+    Peter_Sr = Patient(startingViri(), 10000)
     # patients = [Patient(herpes_list[x], 1000) for x in range(num_trials)]
 
     # print(Sydney.getTotalPop())
@@ -356,6 +427,9 @@ def simulationWithDrug(num_trials=None, delay=None, fignum=None):
     evolving_gut_res_herpes_pop = []
     evolving_gri_res_herpes_pop = []
     evolving_mult_res_herpes_pop = []
+
+    Sydney = Patient(startingViri(), 10000)
+    Peter_Sr = Patient(startingViri(), 10000)
 
     updateContinuousData(Peter_Sr, data1=evolving_herpes_pop, data2=evolving_gut_res_herpes_pop,
                         data3=evolving_gri_res_herpes_pop, data4=evolving_mult_res_herpes_pop, delay=150, trial_num=2)
