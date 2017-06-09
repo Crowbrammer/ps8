@@ -140,9 +140,9 @@ class ResistantVirus(SimpleVirus):
         #         offspring_virus = copy.copy(self)
         #         return offspring_virus
 
-        print([self.isResistantTo(drug) for drug in activeDrugs])
-        print(activeDrugs)
-        print(all([self.isResistantTo(drug) for drug in activeDrugs]))
+        # print([self.isResistantTo(drug) for drug in activeDrugs])
+        # print(activeDrugs)
+        # print(all([self.isResistantTo(drug) for drug in activeDrugs]))
 
         if all([self.isResistantTo(drug) for drug in activeDrugs]):
             if random.random() < self.getMaxBirthProb() * (1 - popDensity):
@@ -308,15 +308,15 @@ def startingViri():
         herpes.append(ResistantVirus(0.1, 0.05, {"guttagonol":False, "grimpex":False}, 0.005))
     return herpes
 
-def updateData(patient, amt, data1=None, data2=None, data3=None, data4=None):
-    for time in range(amt):
-        patient.update(patient.getPrescriptions())
-
-        # If continuous, uncomment
-        data1.append(patient.getTotalPop())
-        data2.append(patient.getResistPop(["guttagonol"]))
-        data3.append(patient.getResistPop(["grimpex"]))
-        data4.append(patient.getResistPop(["guttagonol", "grimpex"]))
+# def updateData(patient, amt, t_pop=None, gut_res_pop=None, gri_res_pop=None, all_res_pop=None):
+#     for time in range(amt):
+#         patient.update(patient.getPrescriptions())
+#
+#         # If continuous, uncomment
+#         t_pop.append(patient.getTotalPop())
+#         gut_res_pop.append(patient.getResistPop(["guttagonol"]))
+#         gri_res_pop.append(patient.getResistPop(["grimpex"]))
+#         all_res_pop.append(patient.getResistPop(["guttagonol", "grimpex"]))
 
 def countResistances(patient):
     resistances = [virus.getResistances() for virus in [virus for virus in patient.getViruses()]]
@@ -331,44 +331,44 @@ def countResistances(patient):
     # return total
 
 
-def updateContinuousData(patient, data1, data2, data3, data4, delay=150, trial_num=1):
-
-    # Trial One
-    if trial_num == 1:
-        for cycle in range(3):
-            updateData(patient, 50, data1, data2, data3, data4)
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            countResistances(patient)
-            input("Check data...")
-        patient.addPrescription("guttagonol")
-
-        for cycle in range(6):
-            updateData(patient, 50, data1, data2, data3, data4)
-            print("Resistances for each virus...")
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            countResistances(patient)
-            input("Check data...")
-        patient.addPrescription("grimpex")
-
-        for cycle in range(3):
-            updateData(patient, 50, data1, data2, data3, data4)
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            countResistances(patient)
-            input("Check data...")
-
-    # Trial Two
-    if trial_num == 2:
-        for cycle in range(3):
-            updateData(patient, 50, data1, data2, data3, data4)
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            input("Check data...")
-        patient.addPrescription("guttagonol")
-        patient.addPrescription("grimpex")
-
-        for cycle in range(3):
-            updateData(patient, 50, data1, data2, data3, data4)
-            [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
-            input("Check data...")
+# def updateContinuousData(patient, t_pop, gut_res_pop, gri_res_pop, all_res_pop, delay=150, trial_num=1):
+#
+#     # Trial One
+#     if trial_num == 1:
+#         for cycle in range(3):
+#             updateData(patient, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+#             [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+#             countResistances(patient)
+#             input("Check data...")
+#         patient.addPrescription("guttagonol")
+#
+#         for cycle in range(6):
+#             updateData(patient, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+#             print("Resistances for each virus...")
+#             [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+#             countResistances(patient)
+#             input("Check data...")
+#         patient.addPrescription("grimpex")
+#
+#         for cycle in range(3):
+#             updateData(patient, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+#             [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+#             countResistances(patient)
+#             input("Check data...")
+#
+#     # Trial Two
+#     if trial_num == 2:
+#         for cycle in range(3):
+#             updateData(patient, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+#             [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+#             input("Check data...")
+#         patient.addPrescription("guttagonol")
+#         patient.addPrescription("grimpex")
+#
+#         for cycle in range(3):
+#             updateData(patient, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+#             [print(virus.getResistances()) for virus in [virus for virus in patient.getViruses()]]
+#             input("Check data...")
 
 
 def simulationWithDrug(num_trials=None, delay=None, fignum=None):
@@ -383,35 +383,86 @@ def simulationWithDrug(num_trials=None, delay=None, fignum=None):
     """
     # TODO
 
-    # herpes_list = [startingViri() for x in range(num_trials)]
+    # Set up the containers for the continually updating herpes populations.
     evolving_herpes_pop = []
     evolving_gut_res_herpes_pop = []
     evolving_gri_res_herpes_pop = []
     evolving_mult_res_herpes_pop = []
 
-    evolving_average_herpes_pop = []
-    evolving_average_gut_res_herpes_pop = []
+    t_pop = evolving_herpes_pop
+    gut_res_pop = evolving_gut_res_herpes_pop
+    gri_res_pop = evolving_gri_res_herpes_pop
+    all_res_pop = evolving_mult_res_herpes_pop
+
+    # For datasets involving mu's.
+    # evolving_average_herpes_pop = []
+    # evolving_average_gut_res_herpes_pop = []
+
+    # Set up two patients. One for differently-timed administration of drugs,
+    # one for same-time administration.
     Sydney = Patient(startingViri(), 10000)
     Peter_Sr = Patient(startingViri(), 10000)
-    # patients = [Patient(herpes_list[x], 1000) for x in range(num_trials)]
 
-    # print(Sydney.getTotalPop())
-    # print("Sydney.getPrescriptions()", Sydney.getPrescriptions())
+    # Begin necessary calculations.
+    # updateContinuousData(Sydney, t_pop=evolving_herpes_pop, gut_res_pop=evolving_gut_res_herpes_pop,
+    #                 gri_res_pop=evolving_gri_res_herpes_pop, all_res_pop=evolving_mult_res_herpes_pop, delay=150, trial_num=1)
 
-    # updateData(Sydney, evolving_herpes_pop, evolving_gut_res_herpes_pop, 150)
+    for cycle in range(3):
+        for time in range(50):
+            Sydney.update(Sydney.getPrescriptions())
+
+            # If continuous, uncomment
+            t_pop.append(Sydney.getTotalPop())
+            gut_res_pop.append(Sydney.getResistPop(["guttagonol"]))
+            gri_res_pop.append(Sydney.getResistPop(["grimpex"]))
+            all_res_pop.append(Sydney.getResistPop(["guttagonol", "grimpex"]))
+        # [print(virus.getResistances()) for virus in [virus for virus in Sydney.getViruses()]]
+        countResistances(Sydney)
+        input("Check data...")
     # Sydney.addPrescription("guttagonol")
-    #
-    # print("Sydney.getTotalPop()", Sydney.getTotalPop())
-    # print("Prescription, guttagonol added...")
-    # print("Sydney.getPrescriptions()", Sydney.getPrescriptions())
-    #
-    # # updateData(Sydney, evolving_herpes_pop, evolving_gut_res_herpes_pop, 150)
 
-    # updateAverageData(patients, evolving_average_herpes_pop, evolving_average_gut_res_herpes_pop, delay)
-    updateContinuousData(Sydney, data1=evolving_herpes_pop, data2=evolving_gut_res_herpes_pop,
-                    data3=evolving_gri_res_herpes_pop, data4=evolving_mult_res_herpes_pop, delay=150, trial_num=1)
+    for cycle in range(6):
+        for time in range(50):
+            Sydney.update(Sydney.getPrescriptions())
 
-    # print("Sydney.getTotalPop()", Sydney.getTotalPop())
+            # If continuous, uncomment
+            t_pop.append(Sydney.getTotalPop())
+            gut_res_pop.append(Sydney.getResistPop(["guttagonol"]))
+            gri_res_pop.append(Sydney.getResistPop(["grimpex"]))
+            all_res_pop.append(Sydney.getResistPop(["guttagonol", "grimpex"]))
+        # print("Resistances for each virus...")
+        # [print(virus.getResistances()) for virus in [virus for virus in Sydney.getViruses()]]
+        countResistances(Sydney)
+        input("Check data...")
+    Sydney.addPrescription("grimpex")
+
+    for cycle in range(3):
+        for time in range(50):
+            patient.update(Sydney.getPrescriptions())
+
+            # If continuous, uncomment
+            t_pop.append(Sydney.getTotalPop())
+            gut_res_pop.append(Sydney.getResistPop(["guttagonol"]))
+            gri_res_pop.append(Sydney.getResistPop(["grimpex"]))
+            all_res_pop.append(Sydney.getResistPop(["guttagonol", "grimpex"]))
+        # [print(virus.getResistances()) for virus in [virus for virus in Sydney.getViruses()]]
+        countResistances(Sydney)
+        input("Check data...")
+
+# Trial Two
+
+    for cycle in range(3):
+        updateData(Peter_Sr, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+        [print(virus.getResistances()) for virus in [virus for virus in Peter_Sr.getViruses()]]
+        input("Check data...")
+    Peter_Sr.addPrescription("guttagonol")
+    Peter_Sr.addPrescription("grimpex")
+
+    for cycle in range(3):
+        updateData(Peter_Sr, 50, t_pop, gut_res_pop, gri_res_pop, all_res_pop)
+        [print(virus.getResistances()) for virus in [virus for virus in Peter_Sr.getViruses()]]
+        input("Check data...")
+
     pylab.figure()
     pylab.title('Analysis of Virus Population Dynamics with Two Drugs (Separate Times)'.format(delay))
     pylab.xlabel('Cycle #')
@@ -431,8 +482,8 @@ def simulationWithDrug(num_trials=None, delay=None, fignum=None):
     Sydney = Patient(startingViri(), 10000)
     Peter_Sr = Patient(startingViri(), 10000)
 
-    updateContinuousData(Peter_Sr, data1=evolving_herpes_pop, data2=evolving_gut_res_herpes_pop,
-                        data3=evolving_gri_res_herpes_pop, data4=evolving_mult_res_herpes_pop, delay=150, trial_num=2)
+    #updateContinuousData(Peter_Sr, t_pop=evolving_herpes_pop, gut_res_pop=evolving_gut_res_herpes_pop,
+                        # gri_res_pop=evolving_gri_res_herpes_pop, all_res_pop=evolving_mult_res_herpes_pop, delay=150, trial_num=2)
 
     pylab.figure()
     pylab.title('Analysis of Virus Population Dynamics with Two Drugs (Same Time)'.format(delay))
